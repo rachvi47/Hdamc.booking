@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Our Services | HDAMC Premium Care</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --brand: #0284c7;
+      --brand-soft: #f0f9ff;
+      --dark: #1e293b;
+      --slate: #475569;
+      --white: #ffffff;
+      --bg: #f8fafc;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--bg);
+      color: var(--dark);
+      line-height: 1.6;
+      padding-bottom: 60px;
+    }
+
+    /* Header Styling */
+    .services-header {
+      padding: 80px 10% 40px;
+      text-align: center;
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .services-header h1 {
+      font-size: clamp(2rem, 5vw, 2.5rem);
+      margin-bottom: 15px;
+      color: var(--dark);
+    }
+
+    .services-header p {
+      color: var(--slate);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Section Containers */
+    .container {
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 30px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--brand-soft);
+    }
+
+    .section-title h2 {
+      font-size: 1.5rem;
+      color: var(--brand);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Grid System */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      margin-bottom: 60px;
+    }
+
+    /* Service Card */
+    .service-card {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border: 1px solid #f1f5f9;
+    }
+
+    .service-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .service-card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 15px;
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .service-card h3 span {
+      color: var(--brand);
+    }
+
+    .service-list {
+      list-style: none;
+    }
+
+    .service-list li {
+      font-size: 0.95rem;
+      color: var(--slate);
+      margin-bottom: 8px;
+      padding-left: 20px;
+      position: relative;
+    }
+
+    .service-list li::before {
+      content: "•";
+      color: var(--brand);
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+
+    /* Back Button */
+    .back-nav {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 1000;
+    }
+
+    .btn-back {
+      background: var(--white);
+      color: var(--brand);
+      padding: 10px 20px;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      font-size: 0.9rem;
+      transition: 0.3s;
+    }
+
+    .btn-back:hover {
+      background: var(--brand);
+      color: white;
+    }
+
+    @media (max-width: 600px) {
+      .services-grid { grid-template-columns: 1fr; }
+      .services-header { padding: 60px 20px 30px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="back-nav">
+  <a href="index.html" class="btn-back">← Back to Home</a>
+</div>
+
+<header class="services-header">
+  <h1>Our Medical Expertise</h1>
+  <p>Comprehensive healthcare solutions tailored for families. We provide specialized care ranging from general medicine to advanced laser dentistry.</p>
+</header>
+
+<div class="container">
+  
+  <div class="section-title">
+    <h2>🩺 Medical Services</h2>
+  </div>
+
+  <div class="services-grid">
+    <div class="service-card">
+      <h3><span>●</span> Fever & Infections</h3>
+      <ul class="service-list">
+        <li>Malaria & Dengue Fever</li>
+        <li>Typhoid & Toxic Fevers</li>
+        <li>Respiratory Diseases & Asthma</li>
+        <li>Diarrhea & Gastric Care</li>
+      </ul>
+    </div>
+
+    <div class="service-card">
+      <h3><span>●</span> Specialized Medicine</h3>
+      <ul class="service-list">
+        <li>Kidney Related Diseases</li>
+        <li>Heart Related Conditions</li>
+        <li>Fits & Neurological Problems</li>
+        <li>White Jaundice & Greenish Yellow (Liver Care)</li>
+      </ul>
+    </div>
+
+    <div class="service-card">
+      <h3><span>●</span> Family & Pediatric Care</h3>
+      <ul class="service-list">
+        <li>Specialized Child Healthcare</li>
+        <li>Nutritional Deficiency Management</li>
+        <li>General Consultations (All Ages)</li>
+        <li>Preventative Health Checkups</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section-title">
+    <h2>🦷 Dental Services</h2>
+  </div>
+
+  <div class="services-grid">
+    <div class="service-card">
+      <h3><span>●</span> Advanced Dentistry</h3>
+      <ul class="service-list">
+        <li>Modern Laser Treatment</li>
+        <li>Root Canal Treatment (Wisdom Teeth)</li>
+        <li>Digital OPG X-RAY Examinations</li>
+        <li>RVG Assisted Diagnostics</li>
+      </ul>
+    </div>
+
+    <div class="service-card">
+      <h3><span>●</span> Cosmetic & Orthodontic</h3>
+      <ul class="service-list">
+        <li>Fluoride Discoloration (Veneers)</li>
+        <li>Metal & Ceramic Braces (Clips)</li>
+        <li>Tooth-Colored Composite Fillings</li>
+        <li>Height & Alignment Correction</li>
+      </ul>
+    </div>
+
+    <div class="service-card">
+      <h3><span>●</span> Implants & Dentures</h3>
+      <ul class="service-list">
+        <li>Permanent Jawbone Implants</li>
+        <li>Fixed Porcelain Teeth</li>
+        <li>Imported BPS Dentures</li>
+        <li>Gum Problem Treatments</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HDAMC | Secure Booking</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --brand: #0ea5e9; --brand-hover: #0284c7; --bg: #f8fafc; --text: #0f172a; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: #f1f5f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+    .wrapper { width: 100%; max-width: 750px; background: white; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); overflow: hidden; }
+    .header { padding: 30px; text-align: center; border-bottom: 1px solid #eee; }
+    form { padding: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+    .field { display: flex; flex-direction: column; gap: 8px; }
+    .full { grid-column: 1 / -1; }
+    label { font-size: 0.85rem; font-weight: 600; color: #64748b; }
+    input, select, textarea { padding: 12px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 1rem; }
+    input:focus { outline: none; border-color: var(--brand); }
+    .btn { grid-column: 1 / -1; background: var(--brand); color: white; padding: 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+    .btn:hover { background: var(--brand-hover); transform: translateY(-2px); }
+  </style>
+</head>
+<body>
+
+<div class="wrapper">
+  <div class="header">
+    <h2>Book Appointment</h2>
+    <p>Complete the form below to secure your slot</p>
+  </div>
+
+  <form id="appointmentForm">
+    <div class="field full"><label>Full Name</label><input type="text" id="name" required></div>
+    <div class="field"><label>Email</label><input type="email" id="email" required></div>
+    <div class="field"><label>Phone</label><input type="tel" id="phone" required></div>
+    <div class="field"><label>Age</label><input type="number" id="age" required></div>
+    <div class="field"><label>Gender</label>
+      <select id="gender" required>
+        <option value="">Select</option>
+        <option>Male</option><option>Female</option><option>Other</option>
+      </select>
+    </div>
+    <div class="field full"><label>Service</label>
+      <select id="service" required>
+        <option value="">Choose Service</option>
+        <option>medical op</option>
+        <option>Dental op</option>
+       
+      </select>
+    </div>
+    <div class="field"><label>Date</label><input type="date" id="date" required></div>
+    <div class="field"><label>Time</label><input type="time" id="time" required></div>
+    <div class="field full"><label>Notes</label><textarea id="notes" placeholder="Optional notes..."></textarea></div>
+    <button type="submit" class="btn" id="submitBtn">Confirm Booking</button>
+  </form>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBAnvpgtFnBRXYApmnnb4yoYQqHqcgnhsk",
+    authDomain: "clinical-570e7.firebaseapp.com",
+    projectId: "clinical-570e7",
+    storageBucket: "clinical-570e7.appspot.com",
+    messagingSenderId: "521811871855",
+    appId: "1:521811871855:web:02ec35c3fd299db6e2659a"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const form = document.getElementById('appointmentForm');
+  const btn = document.getElementById('submitBtn');
+
+  // Prevent past dates
+  document.getElementById('date').min = new Date().toISOString().split("T")[0];
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    btn.innerText = "Securing Appointment...";
+    btn.disabled = true;
+
+    const appointmentData = {
+      name: document.getElementById('name').value,
+      email: document.getElementById('email').value,
+      phone: document.getElementById('phone').value,
+      age: document.getElementById('age').value,
+      gender: document.getElementById('gender').value,
+      service: document.getElementById('service').value,
+      date: document.getElementById('date').value,
+      time: document.getElementById('time').value,
+      notes: document.getElementById('notes').value,
+      timestamp: new Date().toISOString()
+    };
+
+    try {
+      await addDoc(collection(db, "appointments"), appointmentData);
+      localStorage.setItem("lastBooking", JSON.stringify(appointmentData));
+      window.location.href = "confirmation.html";
+    } catch (err) {
+      alert("Error: " + err.message);
+      btn.disabled = false;
+      btn.innerText = "Confirm Booking";
+    }
+  });
+</script>
+</body>
+</html>

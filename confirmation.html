@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirmed | HDAMC</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body { font-family: 'Outfit', sans-serif; background: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+    .card { background: white; width: 100%; max-width: 500px; padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+    .receipt { background: #f1f5f9; border-radius: 12px; padding: 20px; text-align: left; margin: 20px 0; border: 1px dashed #cbd5e1; }
+    .row { display: flex; justify-content: space-between; margin: 10px 0; font-size: 0.95rem; }
+    .label { color: #64748b; }
+    .val { font-weight: 600; }
+    .btn { background: #0f172a; color: white; padding: 15px 30px; border-radius: 10px; border: none; cursor: pointer; width: 100%; font-weight: 600; }
+    .home-link { display: block; margin-top: 15px; color: #64748b; text-decoration: none; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2 style="color: #10b981;">✅ Booking Confirmed</h2>
+  <p>Thank you for choosing HDAMC</p>
+
+  <div class="receipt" id="displayArea"></div>
+
+  <button class="btn" onclick="downloadPDF()">Download Receipt (PDF)</button>
+  <a href="index.html" class="home-link">Return to Homepage</a>
+</div>
+
+<script>
+  const data = JSON.parse(localStorage.getItem("lastBooking"));
+
+  if (data) {
+    document.getElementById('displayArea').innerHTML = `
+      <div class="row"><span class="label">Patient:</span> <span class="val">${data.name}</span></div>
+      <div class="row"><span class="label">Service:</span> <span class="val">${data.service}</span></div>
+      <div class="row"><span class="label">Date:</span> <span class="val">${data.date}</span></div>
+      <div class="row"><span class="label">Time:</span> <span class="val">${data.time}</span></div>
+      <div class="row"><span class="label">Phone:</span> <span class="val">${data.phone}</span></div>
+    `;
+  }
+
+  function downloadPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.setFontSize(22);
+    doc.text("HDAMC APPOINTMENT", 20, 20);
+    doc.setFontSize(12);
+    doc.text(`Patient Name: ${data.name}`, 20, 40);
+    doc.text(`Medical Service: ${data.service}`, 20, 50);
+    doc.text(`Appointment Date: ${data.date}`, 20, 60);
+    doc.text(`Appointment Time: ${data.time}`, 20, 70);
+    doc.text(`Contact: ${data.phone}`, 20, 80);
+    doc.text(`Notes: ${data.notes || 'N/A'}`, 20, 90);
+    
+    doc.save(`HDAMC_Receipt_${data.date}.pdf`);
+  }
+</script>
+</body>
+</html>
