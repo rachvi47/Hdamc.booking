@@ -19,6 +19,7 @@
     input:focus { outline: none; border-color: var(--brand); }
     .btn { grid-column: 1 / -1; background: var(--brand); color: white; padding: 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.3s; margin-top: 10px; }
     .btn:hover { background: var(--brand-hover); transform: translateY(-2px); }
+    .btn:disabled { background: #cbd5e1; cursor: not-allowed; transform: none; }
   </style>
 </head>
 <body>
@@ -26,85 +27,177 @@
 <div class="wrapper">
   <div class="header">
     <h2>Book Appointment</h2>
-    <p>Complete the form below to secure your slot</p>
+    <p></p>
   </div>
 
   <form id="appointmentForm">
     <div class="field full"><label>Full Name</label><input type="text" id="name" required></div>
     <div class="field"><label>Email</label><input type="email" id="email" required></div>
     <div class="field"><label>Phone</label><input type="tel" id="phone" required></div>
-    <div class="field"><label>Age</label><input type="number" id="age" required></div>
+    
+    <div class="field"><label>Age</label><input type="number" id="age" required min="1" max="120"></div>
     <div class="field"><label>Gender</label>
       <select id="gender" required>
         <option value="">Select</option>
-        <option>Male</option><option>Female</option><option>Other</option>
+        <option>Male</option>
+        <option>Female</option>
+        <option>Other</option>
       </select>
     </div>
+
     <div class="field full"><label>Service</label>
       <select id="service" required>
         <option value="">Choose Service</option>
-        <option>medical op</option>
-        <option>Dental op</option>
-       
+        <option value="medical op">Medical OP</option>
+        <option value="dental op">Dental OP</option>
       </select>
     </div>
-    <div class="field"><label>Date</label><input type="date" id="date" required></div>
-    <div class="field"><label>Time</label><input type="time" id="time" required></div>
+
+    <div class="field">
+        <label>Date</label>
+        <input type="date" id="date" required>
+    </div>
+    <div class="field">
+        <label>Time</label>
+        <input type="time" id="time" step="1200" required>
+    </div>
+
     <div class="field full"><label>Notes</label><textarea id="notes" placeholder="Optional notes..."></textarea></div>
     <button type="submit" class="btn" id="submitBtn">Confirm Booking</button>
   </form>
 </div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { 
+  getFirestore, 
+  collection, 
+  addDoc, 
+  query, 
+  where, 
+  getDocs 
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBAnvpgtFnBRXYApmnnb4yoYQqHqcgnhsk",
-    authDomain: "clinical-570e7.firebaseapp.com",
-    projectId: "clinical-570e7",
-    storageBucket: "clinical-570e7.appspot.com",
-    messagingSenderId: "521811871855",
-    appId: "1:521811871855:web:02ec35c3fd299db6e2659a"
-  };
+// 1. FIREBASE CONFIGURATION
+const firebaseConfig = {
+  apiKey: "AIzaSyBAnvpgtFnBRXYApmnnb4yoYQqHqcgnhsk",
+  authDomain: "clinical-570e7.firebaseapp.com",
+  projectId: "clinical-570e7",
+  storageBucket: "clinical-570e7.appspot.com",
+  messagingSenderId: "521811871855",
+  appId: "1:521811871855:web:02ec35c3fd299db6e2659a"
+};
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-  const form = document.getElementById('appointmentForm');
-  const btn = document.getElementById('submitBtn');
+const form = document.getElementById('appointmentForm');
+const btn = document.getElementById('submitBtn');
 
-  // Prevent past dates
-  document.getElementById('date').min = new Date().toISOString().split("T")[0];
+// 2. SET MINIMUM DATE TO TODAY
+document.getElementById('date').min = new Date().toISOString().split("T")[0];
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
+// 3. FORM SUBMISSION HANDLER
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  // Get Form Values
+  const name = document.getElementById('name').value;
+  const email = document.getElementById('email').value;
+  const phone = document.getElementById('phone').value;
+  const age = document.getElementById('age').value;
+  const gender = document.getElementById('gender').value;
+  const service = document.getElementById('service').value;
+  const date = document.getElementById('date').value;
+  const time = document.getElementById('time').value;
+  const notes = document.getElementById('notes').value;
+
+  // --- A. CONVERT TIME TO TOTAL MINUTES FOR LOGIC ---
+  const [hours, minutes] = time.split(':').map(Number);
+  const totalMinutes = hours * 60 + minutes;
+
+  const startAM = 10 * 60;       // 10:00 AM
+  const endAM = 13 * 60;         // 01:00 PM (13:00)
+  const startPM = 14 * 60;       // 02:00 PM (14:00)
+  const endPM = 17 * 60;         // 05:00 PM (17:00)
+
+  // --- B. VALIDATE CLINIC HOURS & LUNCH BREAK ---
+  const isWorkingHours = (totalMinutes >= startAM && totalMinutes < endAM) || 
+                         (totalMinutes >= startPM && totalMinutes < endPM);
+
+  if (!isWorkingHours) {
+    alert("Clinic is closed at this time.\nAvailable Hours:\n10:00 AM - 1:00 PM\n2:00 PM - 5:00 PM");
+    return;
+  }
+
+  // --- C. CONFLICT CHECK (20-MINUTE GAP) ---
+  btn.innerText = "Checking availability...";
+  btn.disabled = true;
+
+  try {
+    // Only check existing appointments for the SAME DATE and SAME SERVICE
+    const q = query(
+      collection(db, "appointments"),
+      where("date", "==", date),
+      where("service", "==", service)
+    );
+
+    const querySnapshot = await getDocs(q);
+    let isConflict = false;
+
+    querySnapshot.forEach((doc) => {
+      const existingTime = doc.data().time; // Example: "10:15"
+      const [exH, exM] = existingTime.split(':').map(Number);
+      const existingTotalMin = (exH * 60) + exM;
+
+      // Calculate absolute difference in minutes
+      const diff = Math.abs(existingTotalMin - totalMinutes);
+
+      // If difference is less than 20 minutes, it's a conflict
+      if (diff < 20) {
+        isConflict = true;
+      }
+    });
+
+    if (isConflict) {
+      alert(`Error: There is another ${service} appointment within 20 minutes of this time. Please choose a different slot.`);
+      btn.disabled = false;
+      btn.innerText = "Confirm Booking";
+      return;
+    }
+
+    // --- D. PROCEED WITH FIREBASE SAVE ---
     btn.innerText = "Securing Appointment...";
-    btn.disabled = true;
-
+    
     const appointmentData = {
-      name: document.getElementById('name').value,
-      email: document.getElementById('email').value,
-      phone: document.getElementById('phone').value,
-      age: document.getElementById('age').value,
-      gender: document.getElementById('gender').value,
-      service: document.getElementById('service').value,
-      date: document.getElementById('date').value,
-      time: document.getElementById('time').value,
-      notes: document.getElementById('notes').value,
+      name,
+      email,
+      phone,
+      age,
+      gender,
+      service,
+      date,
+      time,
+      notes,
+      status: "pending",
       timestamp: new Date().toISOString()
     };
 
-    try {
-      await addDoc(collection(db, "appointments"), appointmentData);
-      localStorage.setItem("lastBooking", JSON.stringify(appointmentData));
-      window.location.href = "confirmation.html";
-    } catch (err) {
-      alert("Error: " + err.message);
-      btn.disabled = false;
-      btn.innerText = "Confirm Booking";
-    }
-  });
+    await addDoc(collection(db, "appointments"), appointmentData);
+    
+    // Success! Redirect to confirmation
+    localStorage.setItem("lastBooking", JSON.stringify(appointmentData));
+    window.location.href = "confirmation.html";
+
+  } catch (err) {
+    console.error("Firestore Error:", err);
+    alert("Booking failed: " + err.message);
+    btn.disabled = false;
+    btn.innerText = "Confirm Booking";
+  }
+});
+
 </script>
 </body>
 </html>
+
