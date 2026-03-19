@@ -7,56 +7,131 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
-    body { font-family: 'Outfit', sans-serif; background: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-    .card { background: white; width: 100%; max-width: 500px; padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-    .receipt { background: #f1f5f9; border-radius: 12px; padding: 20px; text-align: left; margin: 20px 0; border: 1px dashed #cbd5e1; }
-    .row { display: flex; justify-content: space-between; margin: 10px 0; font-size: 0.95rem; }
-    .label { color: #64748b; }
-    .val { font-weight: 600; }
-    .btn { background: #0f172a; color: white; padding: 15px 30px; border-radius: 10px; border: none; cursor: pointer; width: 100%; font-weight: 600; }
-    .home-link { display: block; margin-top: 15px; color: #64748b; text-decoration: none; font-size: 0.9rem; }
+    body { font-family: 'Outfit', sans-serif; background: #f1f5f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+    .card { background: white; width: 100%; max-width: 450px; padding: 40px; border-radius: 24px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+    
+    .id-badge { background: #0ea5e9; color: white; display: inline-block; padding: 10px 25px; border-radius: 12px; margin: 20px 0; }
+    .id-number { font-size: 2.5rem; font-weight: 800; letter-spacing: 2px; line-height: 1; }
+    
+    .receipt { background: #f8fafc; border-radius: 16px; padding: 24px; text-align: left; margin: 20px 0; border: 1.5px dashed #cbd5e1; }
+    .row { display: flex; justify-content: space-between; margin: 12px 0; font-size: 0.95rem; }
+    .label { color: #64748b; font-weight: 500; }
+    .val { font-weight: 700; color: #1e293b; text-transform: capitalize; }
+    
+    .btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 25px; }
+    .btn { background: #0ea5e9; color: white; padding: 16px; border-radius: 12px; border: none; cursor: pointer; width: 100%; font-weight: 700; transition: 0.2s; font-size: 1rem; }
+    .btn:hover { background: #0284c7; transform: translateY(-2px); }
+    
+    .home-link { color: #64748b; text-decoration: none; font-size: 0.9rem; font-weight: 500; margin-top: 10px; }
+    .home-link:hover { color: #0ea5e9; }
+    
+    .success-icon { color: #10b981; font-size: 3rem; margin-bottom: 10px; }
   </style>
 </head>
 <body>
 
 <div class="card">
-  <h2 style="color: #10b981;">✅ Booking Confirmed</h2>
-  <p>Thank you for choosing HDAMC</p>
+  <div class="success-icon">✓</div>
+  <h2 style="color: #0f172a; font-weight: 700; font-size: 1.5rem;">Booking Confirmed</h2>
+  <p style="color: #64748b; font-size: 0.95rem;">Please present this ID at the reception</p>
 
-  <div class="receipt" id="displayArea"></div>
+  <div class="id-badge">
+    <p style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; opacity: 0.9;">Patient Token</p>
+    <div class="id-number" id="bookingIdDisplay">----</div>
+  </div>
 
-  <button class="btn" onclick="downloadPDF()">Download Receipt (PDF)</button>
-  <a href="index.html" class="home-link">Return to Homepage</a>
+  <div class="receipt" id="displayArea">
+    </div>
+
+  <div class="btn-group">
+    <button class="btn" onclick="downloadPDF()">Download PDF Receipt</button>
+    <a href="index.html" class="home-link">Back to Homepage</a>
+  </div>
 </div>
 
 <script>
+  // 1. GET DATA FROM LOCALSTORAGE
   const data = JSON.parse(localStorage.getItem("lastBooking"));
 
   if (data) {
+    // Populate UI
+    document.getElementById('bookingIdDisplay').innerText = data.bookingId;
+    
     document.getElementById('displayArea').innerHTML = `
-      <div class="row"><span class="label">Patient:</span> <span class="val">${data.name}</span></div>
+      <div class="row"><span class="label">Patient Name:</span> <span class="val">${data.name}</span></div>
       <div class="row"><span class="label">Service:</span> <span class="val">${data.service}</span></div>
       <div class="row"><span class="label">Date:</span> <span class="val">${data.date}</span></div>
       <div class="row"><span class="label">Time:</span> <span class="val">${data.time}</span></div>
       <div class="row"><span class="label">Phone:</span> <span class="val">${data.phone}</span></div>
     `;
+  } else {
+    // Redirect if no data
+    window.location.href = "booking.html";
   }
 
+  // 2. PDF GENERATION LOGIC
   function downloadPDF() {
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+    const doc = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a5" // Small receipt size
+    });
 
-    doc.setFontSize(22);
-    doc.text("HDAMC APPOINTMENT", 20, 20);
-    doc.setFontSize(12);
-    doc.text(`Patient Name: ${data.name}`, 20, 40);
-    doc.text(`Medical Service: ${data.service}`, 20, 50);
-    doc.text(`Appointment Date: ${data.date}`, 20, 60);
-    doc.text(`Appointment Time: ${data.time}`, 20, 70);
-    doc.text(`Contact: ${data.phone}`, 20, 80);
-    doc.text(`Notes: ${data.notes || 'N/A'}`, 20, 90);
+    // Branding
+    doc.setFillColor(14, 165, 233);
+    doc.rect(0, 0, 150, 40, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(20);
+    doc.text("HDAMC CLINIC", 15, 20);
+    doc.setFontSize(10);
+    doc.text("Official Appointment Receipt", 15, 28);
+
+    // Token Box
+    doc.setFillColor(248, 250, 252);
+    doc.rect(15, 45, 120, 30, 'F');
+    doc.setTextColor(15, 23, 42);
+    doc.setFontSize(10);
+    doc.text("RECEPTION TOKEN ID:", 50, 55);
+    doc.setFontSize(24);
+    doc.text(data.bookingId, 63, 68);
+
+    // Patient Details
+    doc.setTextColor(100, 116, 139);
+    doc.setFontSize(10);
+    doc.text("PATIENT DETAILS", 15, 85);
     
-    doc.save(`HDAMC_Receipt_${data.date}.pdf`);
+    doc.setDrawColor(226, 232, 240);
+    doc.line(15, 87, 135, 87);
+
+    doc.setTextColor(30, 41, 59);
+    doc.setFontSize(11);
+    const leftX = 15;
+    const rightX = 135;
+    
+    let y = 98;
+    const rows = [
+        ["Patient Name", data.name],
+        ["Service Type", data.service.toUpperCase()],
+        ["Appointment Date", data.date],
+        ["Appointment Time", data.time],
+        ["Contact Number", data.phone]
+    ];
+
+    rows.forEach(row => {
+        doc.text(row[0] + ":", leftX, y);
+        doc.text(row[1], 80, y);
+        y += 10;
+    });
+
+    // Footer
+    doc.setFontSize(8);
+    doc.setTextColor(148, 163, 184);
+    doc.text("Please arrive 15 minutes before your slot.", 15, 160);
+    doc.text("HDAMC System Generated Receipt", 15, 165);
+    
+    // Save
+    doc.save(`HDAMC_${data.bookingId}_Receipt.pdf`);
   }
 </script>
 </body>
